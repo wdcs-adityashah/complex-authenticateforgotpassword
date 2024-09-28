@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import "../App.css";
 import Axios from 'axios';
-import {useNavigate,Link} from 'react-router-dom'
+import {useNavigate,Link, useParams} from 'react-router-dom'
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
-
+  const {token} = useParams()
   const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault()
-    Axios.post('http://localhost:5010/auth/reset-password',{
+    Axios.post('http://localhost:5010/auth/reset-password/'+token,{
     password
     }).then(response=>{
       if(response.data.status){
@@ -23,8 +23,7 @@ const ResetPassword = () => {
     <div className="sign-up-container">
       <form className="sign-up-form" onSubmit={handleSubmit}>
         <h2>Reset Password</h2>
-    <label htmlFor="email">Email:</label>
-        
+    <label htmlFor="password">New Password:</label>
         <input
           type="password"
           placeholder="*****"

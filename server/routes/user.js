@@ -66,10 +66,8 @@ router.post('/forgot-password',async (req,res)=>{
     
     transporter.sendMail(mailOptions, function(error, info){
       if (error) {
-console.log("eeeeeeeeeeeee", error)
         return res.json({message:"error sending email"})
       } else {
-console.log("ssssssssssss", info)
         return res.json({status:true,message:"email sent"})
       }
     });
@@ -77,5 +75,38 @@ console.log("ssssssssssss", info)
     console.log(error);
   }
 
+})
+router.post('/reset-password/:token',async(req,res)=>{
+  const {token} = req.params;
+  const {password} = req.body;
+  try {
+    const decoded = await jwt.verify(token,process.env.KEY);
+    const id = decoded.id;
+    const hashPassword = await bcrypt.hash(password,10)
+    await User.findByIdAndUpdate({_id:id},{password:hashPassword})
+      return res.json({status:true,message:"updated password"});
+  } catch (err) {
+    return res.json("invalid token")
+  }
+})
+const verifyuser = async(req,res,next) => {
+  try {
+    const token = req.cookies.token;
+    if(!token){
+      return res.json({status:false,message:"no token"});
+    }
+    const decoded = await jwt.verify(token,process.env.KEY);
+    next()
+  } catch (error) {
+    return res.json(error)
+  }
+}
+
+router.get('/verify',verifyuser,async(req,res)=>{
+return res.json({status:true,message:"authorized"})
+})
+router.get('/logout',(req,res)=>{
+    res.clearCookie('token')
+    return res.json({status:true})
 })
 export {router as UserRoute}
